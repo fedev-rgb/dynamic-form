@@ -1,81 +1,28 @@
-<script lang="ts">
-import { defineComponent, reactive, toRefs } from 'vue';
-
-interface Field {
-  id: number;
-  value: string;
-  vowelCount: number;
-  highlighted: boolean;
-}
+<script>
+import { defineComponent } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useFieldStore } from '../store/useFieldStore.ts';
 
 export default defineComponent({
   name: 'DynamicForm',
   setup() {
-    const state = reactive({
-      fields: [
-        {
-          id: 1,
-          value: '',
-          vowelCount: 0,
-          highlighted: false,
-        },
-      ] as Field[],
-      nextId: 2,
-      searchQuery: '',
-      isSearchQueryHighlighted: false,
-    });
+    const fieldStore = useFieldStore();
 
-    const addField = () => {
-      if (state.fields.length < 10) {
-        state.fields.push({
-          id: (state.nextId += 1),
-          value: '',
-          vowelCount: 0,
-          highlighted: false,
-        });
-      }
-    };
-
-    const removeField = (index: number) => {
-      if (state.fields.length > 1) {
-        state.fields.splice(index, 1);
-      }
-    };
-
-    const handleSearch = () => {
-      let field = null;
-
-      if (state.searchQuery) {
-        // state.isSearchQueryHighlighted = false;
-        state.fields.forEach((el) => {
-          field = el;
-          field.highlighted = el.value.includes(state.searchQuery);
-          if (field.highlighted) {
-            state.isSearchQueryHighlighted = true;
-          }
-        });
-      } else if (!state.searchQuery) {
-        state.isSearchQueryHighlighted = false;
-        state.fields.forEach((el) => {
-          field = el;
-          field.highlighted = false;
-        });
-      }
-    };
-
-    const countVowels = (index: number) => {
-      const { value } = state.fields[index];
-      const vowelCount = (value.match(/[aeiou]/gi) || []).length;
-      state.fields[index].vowelCount = vowelCount;
-      handleSearch();
-    };
+    const {
+      fields, searchQuery, isSearchQueryHighlighted,
+    } = storeToRefs(fieldStore);
+    const {
+      addField, removeField, handleSearch, countVowels,
+    } = fieldStore;
 
     return {
-      ...toRefs(state),
+      fields,
+      searchQuery,
+      isSearchQueryHighlighted,
       addField,
       removeField,
-      countVowels,
       handleSearch,
+      countVowels,
     };
   },
 });
